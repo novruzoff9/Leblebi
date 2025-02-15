@@ -1,0 +1,52 @@
+﻿@model IEnumerable<Leblebi.Models.Expense>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Xərclər</h1>
+
+<p>
+    <a asp-action="Create">Xərc artır</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @*Html.DisplayNameFor(model => model.ExpenseCategory)*@
+                Kateqoriya
+            </th>
+            <th>
+                @*Html.DisplayNameFor(model => model.Amount)*@
+                Məbləğ
+            </th>
+            <th>
+                @*Html.DisplayNameFor(model => model.ExpenseDate)*@
+                Tarix
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ExpenseCategory.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Amount)
+            </td>
+            <td>
+                @item.ExpenseDate.ToString("dd MMMM yyyy")
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Düzəliş</a> 
+                @* | *@
+                @* <a asp-action="Details" asp-route-id="@item.Id">Details</a> | *@
+                @* <a asp-action="Delete" asp-route-id="@item.Id">Delete</a> *@
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

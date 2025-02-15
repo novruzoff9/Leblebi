@@ -1,0 +1,39 @@
+@using Leblebi.ViewModels
+@model List<ExpenseReportViewModel>
+
+<h2>Xərclər Hesabatı</h2>
+
+<form method="get">
+    <label for="startDate">Başlanğıc Tarix:</label>
+    <input type="date" name="startDate" value="@Context.Request.Query["startDate"]" />
+
+    <label for="endDate">Son Tarix:</label>
+    <input type="date" name="endDate" value="@Context.Request.Query["endDate"]" />
+
+    <button type="submit" class="btn btn-primary">Süz</button>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Kateqoriya</th>
+            <th>Məbləğ</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var category in Model)
+        {
+            <tr class="table-primary">
+                <td><strong>@category.CategoryName</strong></td>
+                <td><strong>@category.TotalAmount.ToString("N2") ₼</strong></td>
+            </tr>
+            @foreach (var sub in category.Subcategories)
+            {
+                <tr>
+                    <td style="padding-left: 30px;">— @sub.CategoryName</td>
+                    <td>@sub.TotalAmount.ToString("N2") ₼</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

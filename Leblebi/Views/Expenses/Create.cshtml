@@ -1,0 +1,96 @@
+﻿@model Leblebi.Models.Expense
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Xərc artır</h1>
+
+@* <h4>Expense</h4> *@
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="ExpenseCategoryId" class="control-label">Xərc növü</label>
+                <select asp-for="ExpenseCategoryId" class ="form-control" asp-items="ViewBag.ExpenseCategoryId" id="selectCategory">
+                    <option value="">Seçin</option>
+                </select>
+            </div>
+            <div class="form-group d-none mt-2" id="subCategoryContainer">
+                <label asp-for="ExpenseCategoryId" class="control-label">Xərc növü</label>
+                <select class="form-control" asp-items="ViewBag.ExpenseCategoryId" id="selectSubCategory"></select>
+            </div>
+            <div class="form-group mt-2">
+                <label asp-for="Amount" class="control-label">Məbləğ</label>
+                <input asp-for="Amount" class="form-control" />
+                <span asp-validation-for="Amount" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2">
+                <label asp-for="ExpenseDate" class="control-label">Tarix</label>
+                <input asp-for="ExpenseDate" class="form-control" />
+                <span asp-validation-for="ExpenseDate" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2 d-none" id="noteInputContainer">
+                <label asp-for="Note" class="control-label">Qeyd</label>
+                <input asp-for="Note" class="form-control" />
+                <span asp-validation-for="Note" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group">
+                <input type="submit" value="Təsdiqlə" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<br />
+<div>
+    <a asp-action="Index">Siyahıya qayıt</a>
+</div>
+
+@section Scripts {
+    <script>
+        const selectCategory = document.getElementById("selectCategory");
+        const selectSubCategory = document.getElementById("selectSubCategory");
+        const subCategoryContainer = document.getElementById("subCategoryContainer");
+        const noteInputContainer = document.getElementById("noteInputContainer");
+        selectCategory.addEventListener("change", function () {
+
+            const selectedOption = selectCategory.options[selectCategory.selectedIndex];
+            fetch("http://localhost:5073/Expenses/GetSubCategories/" + selectedOption.value)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    if (data.length === 0) {
+                        subCategoryContainer.classList.add("d-none");
+                        selectCategory.setAttribute("name", "ExpenseCategoryId");
+                        selectSubCategory.removeAttribute("name");
+                        return;
+                    }
+                    else{
+                        selectSubCategory.setAttribute("name", "ExpenseCategoryId");
+                        selectCategory.removeAttribute("name"); 
+                        subCategoryContainer.classList.remove("d-none");
+                    }
+                    selectSubCategory.innerHTML = "";
+                    data.forEach(subCategory => {
+                        const option = document.createElement("option");
+                        option.value = subCategory.value;
+                        option.text = subCategory.text;
+                        selectSubCategory.appendChild(option);
+                    });
+                });
+            if(selectedOption.value === "23"){
+                noteInputContainer.classList.remove("d-none");
+            }
+            else{
+                noteInputContainer.classList.add("d-none");
+            }
+        });
+    </script>
+    
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

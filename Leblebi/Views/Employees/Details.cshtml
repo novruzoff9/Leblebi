@@ -1,0 +1,48 @@
+﻿@using System.Globalization
+@model Leblebi.Models.Employee
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h4>İşçi məlumatları</h4>
+
+<div>
+    <h1>@Model.Name @Model.Surname</h1>
+    <hr />
+    <dl class="row">
+        @*
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Surname)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Surname)
+        </dd>*@
+        <dt>
+            Maaşlar
+        </dt>
+        <dd>
+            <ul>
+                @foreach (var salary in Model.Salaries)
+                {
+
+                    CultureInfo culture = new CultureInfo("az-AZ"); // Example for Turkish culture
+                    DateTimeFormatInfo dtfi = culture.DateTimeFormat;
+                    <li>@salary.Amount &#8380; - @salary.SalaryDate.ToString("dd MMMM yyyy", dtfi)</li>
+                }
+            </ul>
+        </dd>
+    </dl>
+
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Düzəliş</a> |
+    <a asp-action="Index">Siyahıya qayıt</a>
+</div>
