@@ -8,7 +8,5 @@ public class EmployeeSalary
     public int EmployeeId { get; set; }
     public Employee? Employee { get; set; }
     public decimal Amount { get; set; }
-
-    [Column(TypeName = "timestamp without time zone")]
     public DateTime SalaryDate { get; set; }
 }

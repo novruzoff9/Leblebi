@@ -28,9 +28,5 @@ public class ApplicationDbContext : DbContext
             .HasMany(e => e.Salaries)
             .WithOne(e => e.Employee)
             .HasForeignKey(e => e.EmployeeId);
-
-        modelBuilder.Entity<Income>()
-            .Property(e => e.IncomeDate)
-            .HasConversion(v => v, v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
     }
 }

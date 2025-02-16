@@ -1,96 +1,99 @@
-﻿@model Leblebi.Models.Expense
+﻿@model Leblebi.ViewModels.MonthlyReportCreateViewModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Yeni Xərclər";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+    var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
 }
+<style>
+    .form {
+        overflow-x: auto; /* Üfüqi sürüşdürmə aktiv olsun */
+        max-width: 100%; /* Konteynerin genişliyini məhdudlaşdır */
+    }
 
-<h1>Xərc artır</h1>
+    .table {
+        width: 100%; /* Cədvəl tam genişlikdə olsun */
+        border-collapse: collapse; /* Sərhədləri birləşdir */
+    }
 
-@* <h4>Expense</h4> *@
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="ExpenseCategoryId" class="control-label">Xərc növü</label>
-                <select asp-for="ExpenseCategoryId" class ="form-control" asp-items="ViewBag.ExpenseCategoryId" id="selectCategory">
-                    <option value="">Seçin</option>
-                </select>
-            </div>
-            <div class="form-group d-none mt-2" id="subCategoryContainer">
-                <label asp-for="ExpenseCategoryId" class="control-label">Xərc növü</label>
-                <select class="form-control" asp-items="ViewBag.ExpenseCategoryId" id="selectSubCategory"></select>
-            </div>
-            <div class="form-group mt-2">
-                <label asp-for="Amount" class="control-label">Məbləğ</label>
-                <input asp-for="Amount" class="form-control" />
-                <span asp-validation-for="Amount" class="text-danger"></span>
-            </div>
-            <div class="form-group mt-2">
-                <label asp-for="ExpenseDate" class="control-label">Tarix</label>
-                <input asp-for="ExpenseDate" class="form-control" />
-                <span asp-validation-for="ExpenseDate" class="text-danger"></span>
-            </div>
-            <div class="form-group mt-2 d-none" id="noteInputContainer">
-                <label asp-for="Note" class="control-label">Qeyd</label>
-                <input asp-for="Note" class="form-control" />
-                <span asp-validation-for="Note" class="text-danger"></span>
-            </div>
-            <br />
-            <div class="form-group">
-                <input type="submit" value="Təsdiqlə" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
+    th, td {
+        padding: 8px;
+        border: 1px solid #ddd;
+        text-align: center;
+        white-space: nowrap; /* Sütunlar daralmasın */
+    }
 
-<br />
-<div>
-    <a asp-action="Index">Siyahıya qayıt</a>
-</div>
+    .sticky-col {
+        position: sticky;
+        left: 0;
+        background-color: white !important; /* Sabit sütunun fon rəngi */
+        z-index: 2; /* Üst qat */
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Sərhəd effekti */
+    }
+
+</style>
+
+<h1>Yeni Xərclər</h1>
+
+<form asp-action="Create" method="post">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th class="sticky-col">Kateqoriya</th>
+                @for (var date = firstDayOfMonth; date <= lastDayOfMonth; date = date.AddDays(1))
+                {
+                    <th style="width:60px !important">
+                        @date.ToString("dd")
+                    </th>
+                }
+                <th>Ümumi məbləğ</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (var i = 0; i < Model.Expenses.Count; i++)
+            {
+                <tr>
+                    <td class="sticky-col">
+                        @Html.HiddenFor(model => model.Expenses[i].CategoryId)
+                        @Model.Expenses[i].CategoryName
+                    </td>
+                    @for (var date = firstDayOfMonth; date <= lastDayOfMonth; date = date.AddDays(1))
+                    {
+                        <td style="width:60px !important">
+                            <input type="number" class="form-control" name="Expenses[@i].DailyExpenses[@date.Day]" style="width:60px;" value="@Model.Expenses[i].DailyExpenses[date.Day]" />
+                        </td>
+                    }
+                    <td>
+                        <input type="text" class="form-control total-expense" readonly />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-primary">Təsdiqlə</button>
+</form>
 
 @section Scripts {
     <script>
-        const selectCategory = document.getElementById("selectCategory");
-        const selectSubCategory = document.getElementById("selectSubCategory");
-        const subCategoryContainer = document.getElementById("subCategoryContainer");
-        const noteInputContainer = document.getElementById("noteInputContainer");
-        selectCategory.addEventListener("change", function () {
-
-            const selectedOption = selectCategory.options[selectCategory.selectedIndex];
-            fetch("http://localhost:5073/Expenses/GetSubCategories/" + selectedOption.value)
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data);
-                    if (data.length === 0) {
-                        subCategoryContainer.classList.add("d-none");
-                        selectCategory.setAttribute("name", "ExpenseCategoryId");
-                        selectSubCategory.removeAttribute("name");
-                        return;
-                    }
-                    else{
-                        selectSubCategory.setAttribute("name", "ExpenseCategoryId");
-                        selectCategory.removeAttribute("name"); 
-                        subCategoryContainer.classList.remove("d-none");
-                    }
-                    selectSubCategory.innerHTML = "";
-                    data.forEach(subCategory => {
-                        const option = document.createElement("option");
-                        option.value = subCategory.value;
-                        option.text = subCategory.text;
-                        selectSubCategory.appendChild(option);
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll(".table tbody tr").forEach(row => {
+                    let total = 0;
+                    row.querySelectorAll("input[type='number']").forEach(input => {
+                        total += parseFloat(input.value) || 0;
                     });
+                    row.querySelector(".total-expense").value = total.toFixed(2);
+            });
+            document.querySelectorAll(".table tbody tr").forEach(row => {
+                row.addEventListener("input", function() {
+                    let total = 0;
+                    row.querySelectorAll("input[type='number']").forEach(input => {
+                        total += parseFloat(input.value) || 0;
+                    });
+                    row.querySelector(".total-expense").value = total.toFixed(2);
                 });
-            if(selectedOption.value === "23"){
-                noteInputContainer.classList.remove("d-none");
-            }
-            else{
-                noteInputContainer.classList.add("d-none");
-            }
+            });
         });
     </script>
-    
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

@@ -7,20 +7,16 @@
       "RelativeMoniker": "D:0:0:{55191EA8-8EA1-4BC4-98C0-4A4CF4C71DEA}|Leblebi\\Leblebi.csproj|solutionrelative:leblebi\\controllers\\expensescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{55191EA8-8EA1-4BC4-98C0-4A4CF4C71DEA}|Leblebi\\Leblebi.csproj|c:\\users\\user\\source\\repos\\leblebi\\leblebi\\views\\expenses\\report.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{55191EA8-8EA1-4BC4-98C0-4A4CF4C71DEA}|Leblebi\\Leblebi.csproj|solutionrelative:leblebi\\views\\expenses\\report.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{55191EA8-8EA1-4BC4-98C0-4A4CF4C71DEA}|Leblebi\\Leblebi.csproj|c:\\users\\user\\source\\repos\\leblebi\\leblebi\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{55191EA8-8EA1-4BC4-98C0-4A4CF4C71DEA}|Leblebi\\Leblebi.csproj|solutionrelative:leblebi\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{55191EA8-8EA1-4BC4-98C0-4A4CF4C71DEA}|Leblebi\\Leblebi.csproj|c:\\users\\user\\source\\repos\\leblebi\\leblebi\\viewmodels\\homevm.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{55191EA8-8EA1-4BC4-98C0-4A4CF4C71DEA}|Leblebi\\Leblebi.csproj|solutionrelative:leblebi\\viewmodels\\homevm.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{55191EA8-8EA1-4BC4-98C0-4A4CF4C71DEA}|Leblebi\\Leblebi.csproj|c:\\users\\user\\source\\repos\\leblebi\\leblebi\\views\\expenses\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{55191EA8-8EA1-4BC4-98C0-4A4CF4C71DEA}|Leblebi\\Leblebi.csproj|solutionrelative:leblebi\\views\\expenses\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{55191EA8-8EA1-4BC4-98C0-4A4CF4C71DEA}|Leblebi\\Leblebi.csproj|c:\\users\\user\\source\\repos\\leblebi\\leblebi\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{55191EA8-8EA1-4BC4-98C0-4A4CF4C71DEA}|Leblebi\\Leblebi.csproj|solutionrelative:leblebi\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{55191EA8-8EA1-4BC4-98C0-4A4CF4C71DEA}|Leblebi\\Leblebi.csproj|c:\\users\\user\\source\\repos\\leblebi\\leblebi\\viewmodels\\homevm.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{55191EA8-8EA1-4BC4-98C0-4A4CF4C71DEA}|Leblebi\\Leblebi.csproj|solutionrelative:leblebi\\viewmodels\\homevm.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -38,15 +34,15 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Report.cshtml",
-              "DocumentMoniker": "C:\\Users\\User\\source\\repos\\Leblebi\\Leblebi\\Views\\Expenses\\Report.cshtml",
-              "RelativeDocumentMoniker": "Leblebi\\Views\\Expenses\\Report.cshtml",
-              "ToolTip": "C:\\Users\\User\\source\\repos\\Leblebi\\Leblebi\\Views\\Expenses\\Report.cshtml",
-              "RelativeToolTip": "Leblebi\\Views\\Expenses\\Report.cshtml",
-              "ViewState": "AgIAAAwAAAAAAAAAAAAAAAMAAAAZAAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "Create.cshtml",
+              "DocumentMoniker": "C:\\Users\\User\\source\\repos\\Leblebi\\Leblebi\\Views\\Expenses\\Create.cshtml",
+              "RelativeDocumentMoniker": "Leblebi\\Views\\Expenses\\Create.cshtml",
+              "ToolTip": "C:\\Users\\User\\source\\repos\\Leblebi\\Leblebi\\Views\\Expenses\\Create.cshtml",
+              "RelativeToolTip": "Leblebi\\Views\\Expenses\\Create.cshtml",
+              "ViewState": "AgIAAEgAAAAAAAAAAAAAAFUAAABRAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-02-15T15:36:02.003Z",
+              "WhenOpened": "2025-02-16T11:00:47.799Z",
               "EditorCaption": ""
             },
             {
@@ -57,32 +53,20 @@
               "RelativeDocumentMoniker": "Leblebi\\Controllers\\ExpensesController.cs",
               "ToolTip": "C:\\Users\\User\\source\\repos\\Leblebi\\Leblebi\\Controllers\\ExpensesController.cs",
               "RelativeToolTip": "Leblebi\\Controllers\\ExpensesController.cs",
-              "ViewState": "AgIAAC4AAAAAAAAAAADwv0gAAAA0AAAAAAAAAA==",
+              "ViewState": "AgIAABUAAAAAAAAAAAAAwBsAAAAwAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-02-15T14:47:57.611Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "C:\\Users\\User\\source\\repos\\Leblebi\\Leblebi\\Views\\Home\\Index.cshtml",
-              "RelativeDocumentMoniker": "Leblebi\\Views\\Home\\Index.cshtml",
-              "ToolTip": "C:\\Users\\User\\source\\repos\\Leblebi\\Leblebi\\Views\\Home\\Index.cshtml",
-              "RelativeToolTip": "Leblebi\\Views\\Home\\Index.cshtml",
-              "ViewState": "AgIAABgAAAAAAAAAAAAAACoAAAAWAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-02-14T22:56:20.358Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "HomeController.cs",
               "DocumentMoniker": "C:\\Users\\User\\source\\repos\\Leblebi\\Leblebi\\Controllers\\HomeController.cs",
               "RelativeDocumentMoniker": "Leblebi\\Controllers\\HomeController.cs",
               "ToolTip": "C:\\Users\\User\\source\\repos\\Leblebi\\Leblebi\\Controllers\\HomeController.cs",
               "RelativeToolTip": "Leblebi\\Controllers\\HomeController.cs",
-              "ViewState": "AgIAAE8AAAAAAAAAAAAAwD4AAAA3AAAAAAAAAA==",
+              "ViewState": "AgIAAAkAAAAAAAAAAAA8wBQAAAAqAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-02-14T22:56:17.026Z",
               "EditorCaption": ""
@@ -95,9 +79,9 @@
               "RelativeDocumentMoniker": "Leblebi\\ViewModels\\HomeVM.cs",
               "ToolTip": "C:\\Users\\User\\source\\repos\\Leblebi\\Leblebi\\ViewModels\\HomeVM.cs",
               "RelativeToolTip": "Leblebi\\ViewModels\\HomeVM.cs",
-              "ViewState": "AgIAABMAAAAAAAAAAAAswCEAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAACMAAAAAAAAAAAAqwC8AAABDAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-15T11:04:24.939Z",
+              "WhenOpened": "2025-02-16T08:33:57.742Z",
               "EditorCaption": ""
             }
           ]

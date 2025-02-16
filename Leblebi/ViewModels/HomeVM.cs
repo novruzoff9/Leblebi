@@ -6,7 +6,6 @@ public class HomeVM
     public decimal TotalExpense { get; set; }
     public decimal TotalSalaries { get; set; }
 
-    public MonthlyUtilitiesReports MonthlyUtilities { get; set; }
 
     public List<string> Months { get; set; }
     public List<decimal> MonthlyIncomes { get; set; }
@@ -16,13 +15,6 @@ public class HomeVM
     public List<decimal> EmployeeSalaries { get; set; }
 }
 
-public class MonthlyUtilitiesReports
-{
-    public decimal Water { get; set; }
-    public decimal Electricity { get; set; }
-    public decimal Gas { get; set; }
-}
-
 public class ExpenseReportViewModel
 {
     public int CategoryId { get; set; }
@@ -30,4 +22,28 @@ public class ExpenseReportViewModel
     public int? ParentCategoryId { get; set; }
     public decimal TotalAmount { get; set; }
     public List<ExpenseReportViewModel> Subcategories { get; set; } = new List<ExpenseReportViewModel>();
+}
+
+public class MonthlyReportViewModel
+{
+    public string CategoryName { get; set; }
+    public List<DailyReport> Reports { get; set; }
+    public decimal TotalValue { get; set; }
+}
+public class DailyReport
+{
+    public DateOnly Date { get; set; }
+    public decimal Value { get; set; }
+}
+
+public class MonthlyReportCreateViewModel
+{
+    public List<ExpenseCategoryViewModel> Expenses { get; set; }
+}
+
+public class ExpenseCategoryViewModel
+{
+    public int CategoryId { get; set; }
+    public string? CategoryName { get; set; }
+    public Dictionary<int, decimal?> DailyExpenses { get; set; } = new();
 }

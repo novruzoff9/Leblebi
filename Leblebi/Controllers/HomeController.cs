@@ -33,24 +33,6 @@ namespace Leblebi.Controllers
                 .Where(x => x.SalaryDate.Year == now.Year && x.SalaryDate.Month == now.Month)
                 .Sum(i => i.Amount);
 
-            decimal totalElectricityExpense = _context.Expenses
-                .Where(x => x.ExpenseDate.Year == now.Year && x.ExpenseDate.Month == now.Month && x.ExpenseCategoryId == 6)
-                .Sum(i => i.Amount);
-
-
-            decimal totalWaterExpense = _context.Expenses
-                .Where(x => x.ExpenseDate.Year == now.Year && x.ExpenseDate.Month == now.Month && x.ExpenseCategoryId == 7)
-                .Sum(i => i.Amount);
-
-            decimal totalGasExpense = _context.Expenses
-                .Where(x => x.ExpenseDate.Year == now.Year && x.ExpenseDate.Month == now.Month && x.ExpenseCategoryId == 8)
-                .Sum(i => i.Amount);
-            MonthlyUtilitiesReports monthlyUtilities = new MonthlyUtilitiesReports
-            {
-                Water = totalWaterExpense,
-                Electricity = totalElectricityExpense,
-                Gas = totalGasExpense
-            };
             var model = new HomeVM
             {
                 TotalIncome = totalIncome,
@@ -60,8 +42,7 @@ namespace Leblebi.Controllers
                 MonthlyIncomes = new List<decimal> { 1000, 2000, 3000, 4000, 5000, 6000 },
                 MonthlyExpenses = new List<decimal> { 500, 1000, 1500, 2000, 2500, 3000 },
                 EmployeeNames = new List<string>(),
-                EmployeeSalaries = new List<decimal>(),
-                MonthlyUtilities = monthlyUtilities
+                EmployeeSalaries = new List<decimal>()
                 //EmployeeNames = new List<string> { "Alice", "Bob", "Charlie", "David" },
                 //EmployeeSalaries = new List<decimal> { 1000, 2000, 3000, 4000 }
             };

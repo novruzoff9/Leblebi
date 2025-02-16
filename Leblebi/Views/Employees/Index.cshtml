@@ -21,24 +21,38 @@
                 @* @Html.DisplayNameFor(model => model.Surname) *@
                 Soyad
             </th>
+            <th>
+                Maaş
+            </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Surname)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Salary)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Düzəliş</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Ətraflı</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Sil</a>
+                </td>
+            </tr>
+        }
         <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
+            <td style="font-weight:bold; font-size:18px">
+                Ümumi
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Surname)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Düzəliş</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Ətraflı</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Sil</a>
-            </td>
+            <td style="font-weight:bold; font-size:18px">@Model.Count() işçi</td>
+            <td style="font-weight:bold; font-size:18px">@Model.Sum(x => x.Salary) ₼</td>
         </tr>
-}
     </tbody>
 </table>
