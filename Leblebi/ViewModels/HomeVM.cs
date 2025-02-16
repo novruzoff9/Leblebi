@@ -1,4 +1,6 @@
-﻿namespace Leblebi.ViewModels;
+﻿using Leblebi.Models;
+
+namespace Leblebi.ViewModels;
 
 public class HomeVM
 {
@@ -26,9 +28,10 @@ public class ExpenseReportViewModel
 
 public class MonthlyReportViewModel
 {
-    public string CategoryName { get; set; }
+    public string Title { get; set; }
     public List<DailyReport> Reports { get; set; }
     public decimal TotalValue { get; set; }
+    public decimal? SecondValue { get; set; }
 }
 public class DailyReport
 {
@@ -46,4 +49,10 @@ public class ExpenseCategoryViewModel
     public int CategoryId { get; set; }
     public string? CategoryName { get; set; }
     public Dictionary<int, decimal?> DailyExpenses { get; set; } = new();
+}
+
+public class IncomesOfType
+{
+    public string IncomeType { get; set; }
+    public List<Income> Incomes { get; set; }
 }

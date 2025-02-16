@@ -3,11 +3,9 @@
 # Navigate to the project directory
 cd /C:/Users/User/source/repos/Leblebi
 
-# Restore dependencies
-dotnet restore
 
 # Build the project
-dotnet build
+# dotnet build
 
 # Run the project
-dotnet run
+dotnet watch run --project Leblebi

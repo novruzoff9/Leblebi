@@ -262,7 +262,6 @@ C:\Users\User\source\repos\Leblebi\Leblebi\bin\Debug\net8.0\runtimes\win\lib\net
 C:\Users\User\source\repos\Leblebi\Leblebi\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Drawing.Common.dll
 C:\Users\User\source\repos\Leblebi\Leblebi\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Security.Cryptography.ProtectedData.dll
 C:\Users\User\source\repos\Leblebi\Leblebi\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Windows.Extensions.dll
-C:\Users\User\source\repos\Leblebi\Leblebi\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\User\source\repos\Leblebi\Leblebi\obj\Debug\net8.0\Leblebi.sourcelink.json
 C:\Users\User\source\repos\Leblebi\Leblebi\bin\Debug\net8.0\Azure.Core.dll
 C:\Users\User\source\repos\Leblebi\Leblebi\bin\Debug\net8.0\Azure.Identity.dll

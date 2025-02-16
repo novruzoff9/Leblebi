@@ -1,8 +1,10 @@
-﻿@model IEnumerable<Leblebi.Models.Income>
+﻿@model IEnumerable<Leblebi.ViewModels.MonthlyReportViewModel>
 
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+    var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
 }
 
 <h1>Gəlirlər</h1>
@@ -10,42 +12,49 @@
 <p>
     <a asp-action="Create">Gəlir artır</a>
 </p>
-<table class="table">
+<table class="table table-bordered table-striped">
     <thead>
         <tr>
             <th>
-                @* @Html.DisplayNameFor(model => model.Amount) *@
-                Məbləğ
+                Kateqoriya
             </th>
+            @for (var date = firstDayOfMonth; date <= lastDayOfMonth; date = date.AddDays(1))
+            {
+                <th style="width:60px !important">
+                    @date.ToString("dd")
+                </th>
+            }
             <th>
-                @* @Html.DisplayNameFor(model => model.IncomeType) *@
-                Ödəniş növü
+                Ümumi məbləğ
             </th>
-            <th>
-                @* @Html.DisplayNameFor(model => model.IncomeDate) *@
-                Tarix
-            </th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Amount)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IncomeType)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IncomeDate)
-            </td>
-            <td>
-                @* <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> | *@
-                @* <a asp-action="Details" asp-route-id="@item.Id">Details</a> | *@
-                @* <a asp-action="Delete" asp-route-id="@item.Id">Delete</a> *@
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Title)
+                </td>
+                @for (var i = firstDayOfMonth; i <= lastDayOfMonth; i = i.AddDays(1))
+                {
+                    var date = DateOnly.FromDateTime(i);
+                    var expense = item.Reports.FirstOrDefault(x => x.Date == date);
+                    if (expense == null)
+                    {
+                        <td style="width:60px !important"></td>
+                    }
+                    else
+                    {
+                        <td style="width:60px !important">
+                            @expense.Value
+                        </td>
+                    }
+                }
+                <td>
+                    @item.TotalValue
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Leblebi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fe486ee40d2ce27994ec72d1df3d5b4aeeeb665a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5f132f9359a94710f7bbb029fd9699ef53949aaa")]
 [assembly: System.Reflection.AssemblyProductAttribute("Leblebi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Leblebi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

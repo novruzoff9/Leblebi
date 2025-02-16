@@ -35,19 +35,19 @@ namespace Leblebi.Controllers
 
             MonthlyReportViewModel totalMonthlyReport = new MonthlyReportViewModel
             {
-                CategoryName = "Ümumi",
+                Title = "Ümumi",
                 Reports = new List<DailyReport>()
             };
             foreach (var item in expenses)
             {
-                var monthlyReport = monthlyReports.FirstOrDefault(x => x.CategoryName == item.ExpenseCategory.Name);
+                var monthlyReport = monthlyReports.FirstOrDefault(x => x.Title == item.ExpenseCategory.Name);
 
 
                 if (monthlyReport == null)
                 {
                     monthlyReport = new MonthlyReportViewModel
                     {
-                        CategoryName = item.ExpenseCategory.Name,
+                        Title = item.ExpenseCategory.Name,
                         Reports = new List<DailyReport>()
                     };
                     monthlyReports.Add(monthlyReport);
@@ -70,6 +70,7 @@ namespace Leblebi.Controllers
                     Date = DateOnly.FromDateTime(date),
                     Value = dailyExpense
                 });
+                totalMonthlyReport.TotalValue += dailyExpense;
             }
             monthlyReports.Add(totalMonthlyReport);
 

@@ -9,6 +9,7 @@ using Leblebi.Data;
 using Leblebi.Models;
 using Leblebi.Enums;
 using Leblebi.Helper;
+using Leblebi.ViewModels;
 
 namespace Leblebi.Controllers
 {
@@ -27,38 +28,134 @@ namespace Leblebi.Controllers
             var incomes = await _context.Incomes
                 .OrderByDescending(e => e.IncomeDate)
                 .ToListAsync();
-            return View(incomes);
+
+            var firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+
+            List<MonthlyReportViewModel> monthlyReports = new List<MonthlyReportViewModel>();
+
+            MonthlyReportViewModel totalMonthlyReport = new MonthlyReportViewModel
+            {
+                Title = "Ümumi",
+                Reports = new List<DailyReport>()
+            };
+
+            foreach (var item in incomes)
+            {
+                var monthlyReport = monthlyReports.FirstOrDefault(x => x.Title == EnumHelper.GetDisplayName(item.IncomeType));
+
+
+                if (monthlyReport == null)
+                {
+                    monthlyReport = new MonthlyReportViewModel
+                    {
+                        Title = EnumHelper.GetDisplayName(item.IncomeType),
+                        Reports = new List<DailyReport>()
+                    };
+                    monthlyReports.Add(monthlyReport);
+                }
+
+                DailyReport dailyReport = new DailyReport
+                {
+                    Date = DateOnly.FromDateTime(item.IncomeDate),
+                    Value = item.Amount
+                };
+                monthlyReport.TotalValue += item.Amount;
+                monthlyReport.Reports.Add(dailyReport);
+            }
+
+            for (var date = firstDayOfMonth; date <= lastDayOfMonth; date = date.AddDays(1))
+            {
+                var dailyExpense = incomes.Where(x => x.IncomeDate.Date == date.Date).Sum(x => x.Amount);
+                totalMonthlyReport.Reports.Add(new DailyReport
+                {
+                    Date = DateOnly.FromDateTime(date),
+                    Value = dailyExpense
+                });
+                totalMonthlyReport.TotalValue += dailyExpense;
+            }
+            monthlyReports.Add(totalMonthlyReport);
+
+            return View(monthlyReports);
         }
 
         // GET: Incomes/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewBag.IncomeTypeList = Enum.GetValues(typeof(IncomeType))
-                             .Cast<IncomeType>()
-                             .Select(e => new SelectListItem
-                             {
-                                 Value = ((int)e).ToString(),
-                                 Text = EnumHelper.GetDisplayName(e)
-                             }).ToList();
+            var incomes = await _context.Incomes
+                .OrderByDescending(e => e.IncomeDate)
+                .ToListAsync();
 
-            return View();
+            var currentMonth = DateTime.Now.Month;
+            var currentYear = DateTime.Now.Year;
+            var daysInMonth = DateTime.DaysInMonth(currentYear, currentMonth);
+
+            List<IncomesOfType> incomesOfTypes = new List<IncomesOfType>();
+
+            foreach (IncomeType incomeType in Enum.GetValues(typeof(IncomeType)))
+            {
+                var incomesOfType = new IncomesOfType
+                {
+                    IncomeType = incomeType.ToString(),
+                    Incomes = incomes.Where(e => e.IncomeType == incomeType).ToList()
+                };
+                incomesOfTypes.Add(incomesOfType);
+            }
+
+            var incomeViewModels = incomesOfTypes.Select(c => new ExpenseCategoryViewModel
+            {
+                CategoryId = c.IncomeType.ToString() == "Cash" ? 1 : 0,
+                CategoryName = c.IncomeType,
+                DailyExpenses = Enumerable.Range(1, daysInMonth)
+                    .ToDictionary(day => day, day =>
+                        incomes
+                            .FirstOrDefault(e => e.IncomeDate.Year == currentYear
+                                                 && e.IncomeDate.Month == currentMonth
+                                                 && e.IncomeDate.Day == day)
+                            ?.Amount)
+            }).ToList();
+
+
+            var model = new MonthlyReportCreateViewModel { Expenses = incomeViewModels };
+
+            return View(model);
         }
 
         // POST: Incomes/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Amount,IncomeType,IncomeDate")] Income income)
+        public async Task<IActionResult> Create(MonthlyReportCreateViewModel model)
         {
             if (ModelState.IsValid)
             {
-                income.IncomeDate = DateTime.SpecifyKind(income.IncomeDate, DateTimeKind.Utc);
-                _context.Add(income);
+                var firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+
+                foreach (var expenseCategory in model.Expenses)
+                {
+                    foreach (var kvp in expenseCategory.DailyExpenses)
+                    {
+                        if (kvp.Value.HasValue)
+                        {
+                            var expense = new Income
+                            {
+                                IncomeType = (expenseCategory.CategoryId == 1 ? IncomeType.Cash : IncomeType.PosTerminal),
+                                Amount = kvp.Value.Value,
+                                IncomeDate = firstDayOfMonth.AddDays(kvp.Key - 1)
+                            };
+
+                            _context.Incomes.Add(expense);
+                        }
+                    }
+                }
+
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(income);
+
+            return View(model);
         }
 
         // GET: Incomes/Edit/5
