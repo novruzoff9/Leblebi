@@ -7,7 +7,7 @@
 
 <h1>Düzəliş</h1>
 
-<h4>ExpenseCategory</h4>
+<h4>Xərc kateqoriyası</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -19,7 +19,7 @@
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mt-2">
                 <label asp-for="ParentCategoryId" class="control-label"></label>
                 <select asp-for="ParentCategoryId" class="form-control" asp-items="ViewBag.ParentCategoryId">
                     <option value="">Üst kateqoriyanı seçin</option>
@@ -27,14 +27,14 @@
                 <span asp-validation-for="ParentCategoryId" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Təsdiqlə" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a class="btn btn-danger" asp-action="Index">Siyahıya qayıt</a>
 </div>
 
 @section Scripts {

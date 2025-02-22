@@ -1,0 +1,103 @@
+﻿@model Leblebi.ViewModels.MonthlyReportCreateViewModel
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int year = ViewBag.year;
+    int month = ViewBag.month;
+    var firstDayOfMonth = new DateTime(year, month, 1);
+    var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+}
+
+<style>
+    .form {
+        overflow-x: auto; /* Üfüqi sürüşdürmə aktiv olsun */
+        max-width: 100%; /* Konteynerin genişliyini məhdudlaşdır */
+    }
+
+    .table {
+        width: 100%; /* Cədvəl tam genişlikdə olsun */
+        border-collapse: collapse; /* Sərhədləri birləşdir */
+    }
+
+    th, td {
+        padding: 8px;
+        border: 1px solid #ddd;
+        text-align: center;
+        white-space: nowrap; /* Sütunlar daralmasın */
+    }
+
+    .sticky-col {
+        position: sticky;
+        left: 0;
+        top: 0;
+        background-color: white !important; /* Sabit sütunun fon rəngi */
+        z-index: 2; /* Üst qat */
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Sərhəd effekti */
+    }
+
+</style>
+
+<h1>Yeni Xərclər</h1>
+
+<form asp-action="Create" method="post">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th class="sticky-col">Kateqoriya</th>
+                @for (var date = firstDayOfMonth; date <= lastDayOfMonth; date = date.AddDays(1))
+                {
+                    <th style="width:60px !important" class="sticky-col">
+                        @date.ToString("dd")
+                    </th>
+                }
+                <th>Ümumi məbləğ</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (var i = 0; i < Model.Expenses.Count; i++)
+            {
+                <tr>
+                    <td class="sticky-col">
+                        @Html.HiddenFor(model => model.Expenses[i].CategoryId)
+                        @Model.Expenses[i].CategoryName
+                    </td>
+                    @for (var date = firstDayOfMonth; date <= lastDayOfMonth; date = date.AddDays(1))
+                    {
+                        <td style="width:60px !important">
+                            <input type="number" class="form-control" name="Expenses[@i].DailyExpenses[@date.Day]" style="width:100px;" value="@Model.Expenses[i].DailyExpenses[date.Day]" />
+                        </td>
+                    }
+                    <td>
+                        <input type="text" class="form-control total-expense" readonly />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-primary w-100">Təsdiqlə</button>
+</form>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll(".table tbody tr").forEach(row => {
+                    let total = 0;
+                    row.querySelectorAll("input[type='number']").forEach(input => {
+                        total += parseFloat(input.value) || 0;
+                    });
+                    row.querySelector(".total-expense").value = total.toFixed(2);
+            });
+            document.querySelectorAll(".table tbody tr").forEach(row => {
+                row.addEventListener("input", function() {
+                    let total = 0;
+                    row.querySelectorAll("input[type='number']").forEach(input => {
+                        total += parseFloat(input.value) || 0;
+                    });
+                    row.querySelector(".total-expense").value = total.toFixed(2);
+                });
+            });
+        });
+    </script>
+}

@@ -7,4 +7,6 @@ public class Employee
     public string Surname { get; set; }
     public List<EmployeeSalary>? Salaries { get; set; }
     public decimal? Salary { get; set; }
+    public DateOnly HireDate { get; set; }
+    public DateOnly? FireDate { get; set; }
 }

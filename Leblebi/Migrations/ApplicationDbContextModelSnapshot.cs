@@ -30,6 +30,12 @@ namespace Leblebi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateOnly?>("FireDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("HireDate")
+                        .HasColumnType("date");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -141,6 +147,47 @@ namespace Leblebi.Migrations
                     b.ToTable("Incomes");
                 });
 
+            modelBuilder.Entity("Leblebi.Models.ManagementCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ManagementCategories");
+                });
+
+            modelBuilder.Entity("Leblebi.Models.ManagementExpense", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("ExpenseDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ManagementCategoryId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ManagementCategoryId");
+
+                    b.ToTable("ManagementExpenses");
+                });
+
             modelBuilder.Entity("Leblebi.Models.EmployeeSalary", b =>
                 {
                     b.HasOne("Leblebi.Models.Employee", "Employee")
@@ -172,6 +219,17 @@ namespace Leblebi.Migrations
                     b.Navigation("ParentCategory");
                 });
 
+            modelBuilder.Entity("Leblebi.Models.ManagementExpense", b =>
+                {
+                    b.HasOne("Leblebi.Models.ManagementCategory", "ManagementCategory")
+                        .WithMany("Expenses")
+                        .HasForeignKey("ManagementCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ManagementCategory");
+                });
+
             modelBuilder.Entity("Leblebi.Models.Employee", b =>
                 {
                     b.Navigation("Salaries");
@@ -182,6 +240,11 @@ namespace Leblebi.Migrations
                     b.Navigation("Expenses");
 
                     b.Navigation("expenseCategories");
+                });
+
+            modelBuilder.Entity("Leblebi.Models.ManagementCategory", b =>
+                {
+                    b.Navigation("Expenses");
                 });
 #pragma warning restore 612, 618
         }

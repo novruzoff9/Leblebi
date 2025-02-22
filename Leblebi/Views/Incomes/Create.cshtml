@@ -3,7 +3,9 @@
 @{
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+    int year = ViewBag.year;
+    int month = ViewBag.month;
+    var firstDayOfMonth = new DateTime(year, month, 1);
     var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
 }
 <style>
@@ -61,7 +63,7 @@
                     @for (var date = firstDayOfMonth; date <= lastDayOfMonth; date = date.AddDays(1))
                     {
                         <td style="width:60px !important">
-                            <input type="number" class="form-control" name="Expenses[@i].DailyExpenses[@date.Day]" style="width:60px;" value="@Model.Expenses[i].DailyExpenses[date.Day]" />
+                            <input type="number" class="form-control" name="Expenses[@i].DailyExpenses[@date.Day]" style="width:100px;" value="@Model.Expenses[i].DailyExpenses[date.Day]" />
                         </td>
                     }
                     <td>

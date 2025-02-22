@@ -1,68 +1,150 @@
-﻿@model Leblebi.ViewModels.HomeVM
+﻿@using System.Globalization
+@model Leblebi.ViewModels.HomeVM
 @{
     ViewData["Title"] = "Dashboard";
+    int year = ViewBag.year;
+    int month = ViewBag.month;
+    var firstDayOfMonth = new DateTime(year, month, 1);
+    var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
 }
 
 <div class="container mt-5">
-    <h4>Məlumatlar cari ayın ilk günündən etibarən hesablanır</h4>
+
+    <div class="d-flex gap-5 align-items-center">
+        <h4>Məlumatlar seçilmiş ayın ilk günündən etibarən hesablanır</h4>
+        <form asp-action="Index" class="d-flex gap-3 mb-3 align-items-center">
+            <label for="year">İl:</label>
+            <select id="year" class="form-control w-auto" name="year">
+                @for (var i = 2024; i <= DateTime.Now.Year; i++)
+                {
+                    if (i == year)
+                    {
+                        <option value="@i" selected>@i</option>
+                    }
+                    else
+                    {
+                        <option value="@i">@i</option>
+                    }
+                })
+            </select>
+            <label for="month">Ay:</label>
+            <select id="month" class="form-control" name="month">
+                @for (var i = 1; i <= 12; i++)
+                {
+                    DateTimeFormatInfo dtfi = CultureInfo.GetCultureInfo("az-AZ").DateTimeFormat;
+                    if (i == month)
+                    {
+                        <option value="@i" selected>@dtfi.GetMonthName(@i)</option>
+                    }
+                    else
+                    {
+                        <option value="@i">@dtfi.GetMonthName(@i)</option>
+                    }
+                })
+            </select>
+            <button type="submit" class="btn btn-primary">Axtar</button>
+        </form>
+    </div>
+
     <!-- Ümumi hesabatlar-->
     <div class="row">
-        <div class="col-lg-4 col-md-6 mb-4">
+        <div class="col-lg-3 col-md-6 mb-4">
             <div class="card text-white bg-primary">
                 <div class="card-body">
                     <h5 class="card-title">Ümumi gəlir</h5>
                     <p class="card-text">@Model.TotalIncome &#8380;</p>
                 </div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="text-white stretched-link" href="#">Hesabata bax</a>
+                    <a class="text-white stretched-link" href="/Incomes">Hesabata bax</a>
                     <div class="text-white"><i class="fas fa-angle-right"></i></div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-4 col-md-6 mb-4">
+        <div class="col-lg-3 col-md-6 mb-4">
             <div class="card text-white bg-danger">
                 <div class="card-body">
                     <h5 class="card-title">Ümumi Xərc</h5>
                     <p class="card-text">@Model.TotalExpense &#8380;</p>
                 </div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="text-white stretched-link" href="#">Hesabata bax</a>
+                    <a class="text-white stretched-link" href="/Expenses">Hesabata bax</a>
                     <div class="text-white"><i class="fas fa-angle-right"></i></div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-4 col-md-6 mb-4">
+        <div class="col-lg-3 col-md-6 mb-4">
             <div class="card text-white bg-success">
                 <div class="card-body">
                     <h5 class="card-title">İşçilərə verilən ümumi Maaş</h5>
                     <p class="card-text">@Model.TotalSalaries &#8380;</p>
                 </div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="text-white stretched-link" href="#">Hesabata bax</a>
+                    <a class="text-white stretched-link" href="/EmployeeSalaries">Hesabata bax</a>
+                    <div class="text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Müdiriyyətə verilən məbləğ</h5>
+                    <p class="card-text">@Model.TotalManagementExpense &#8380;</p>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="text-white stretched-link" href="/ManagementExpenses">Hesabata bax</a>
                     <div class="text-white"><i class="fas fa-angle-right"></i></div>
                 </div>
             </div>
         </div>
     </div>
-
-    <div class="row mt-4">
-        <div class="col-lg-6 mb-4">
-            <div class="card">
+    
+    <div class="row">
+        <div class="col-lg-6 col-md-6 mb-4">
+            <div class="card text-white bg-info">
                 <div class="card-body">
-                    <h5 class="card-title">Aylıq Gəlir və Xərc</h5>
-                    <canvas id="incomeExpenseChart"></canvas>
+                    <h5 class="card-title">Ümumi mənfəət</h5>
+                    <p class="card-text">@Model.CashProfit &#8380;</p>
                 </div>
+                @* <div class="card-footer d-flex align-items-center justify-content-between"> *@
+                @*     <a class="text-white stretched-link" href="#">Hesabata bax</a> *@
+                @*     <div class="text-white"><i class="fas fa-angle-right"></i></div> *@
+                @* </div> *@
             </div>
         </div>
-        <div class="col-lg-6 mb-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">İşçi Maaşları</h5>
-                    <canvas id="salariesChart"></canvas>
-                </div>
-            </div>
-        </div>
+        @* <div class="col-lg-6 col-md-6 mb-4"> *@
+        @*     <div class="card text-white bg-danger"> *@
+        @*         <div class="card-body"> *@
+        @*             <h5 class="card-title">Ən böyük xərc</h5> *@
+        @*             <p class="card-text"> &#8380;</p> *@
+        @*         </div> *@
+        @*         @* <div class="card-footer d-flex align-items-center justify-content-between"> *@
+        @*         @*     <a class="text-white stretched-link" href="#">Hesabata bax</a> *@ 
+        @*         @*     <div class="text-white"><i class="fas fa-angle-right"></i></div> *@ 
+        @*         @* </div> *@ 
+        @*     </div> *@
+        @* </div> *@
     </div>
+
+
+
+    @* <div class="row mt-4"> *@
+    @*     <div class="col-lg-6 mb-4"> *@
+    @*         <div class="card"> *@
+    @*             <div class="card-body"> *@
+    @*                 <h5 class="card-title">Aylıq Gəlir və Xərc</h5> *@
+    @*                 <canvas id="incomeExpenseChart"></canvas> *@
+    @*             </div> *@
+    @*         </div> *@
+    @*     </div> *@
+    @*     <div class="col-lg-6 mb-4"> *@
+    @*         <div class="card"> *@
+    @*             <div class="card-body"> *@
+    @*                 <h5 class="card-title">Əsas xərclər</h5> *@
+    @*                 <canvas id="salariesChart"></canvas> *@
+    @*             </div> *@
+    @*         </div> *@
+    @*     </div> *@
+    @* </div> *@
 </div>
 
 @section Scripts {
@@ -112,7 +194,9 @@
                         'rgba(255, 206, 86, 0.2)',
                         'rgba(75, 192, 192, 0.2)',
                         'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)'
+                        'rgba(255, 159, 64, 0.2)',
+                        'rgba(13, 202, 240, 0.2)',
+                        'rgba(25, 135, 84, 0.2)'
                     ],
                     borderColor: [
                         'rgba(255, 99, 132, 1)',
@@ -120,7 +204,9 @@
                         'rgba(255, 206, 86, 1)',
                         'rgba(75, 192, 192, 1)',
                         'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)'
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(13, 202, 240, 1)',
+                        'rgba(25, 135, 84, 1)'
                     ],
                     borderWidth: 1
                 }]

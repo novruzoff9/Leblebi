@@ -3,7 +3,9 @@
 @{
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+    int year = ViewBag.year;
+    int month = ViewBag.month;
+    var firstDayOfMonth = new DateTime(year, month, 1);
     var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
 }
 <style>
@@ -27,6 +29,7 @@
     .sticky-col {
         position: sticky;
         left: 0;
+        top: 0;
         background-color: white !important; /* Sabit sütunun fon rəngi */
         z-index: 2; /* Üst qat */
         box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Sərhəd effekti */
@@ -43,7 +46,7 @@
                 <th class="sticky-col">Kateqoriya</th>
                 @for (var date = firstDayOfMonth; date <= lastDayOfMonth; date = date.AddDays(1))
                 {
-                    <th style="width:60px !important">
+                    <th style="width:60px !important" class="sticky-col">
                         @date.ToString("dd")
                     </th>
                 }
@@ -61,7 +64,7 @@
                     @for (var date = firstDayOfMonth; date <= lastDayOfMonth; date = date.AddDays(1))
                     {
                         <td style="width:60px !important">
-                            <input type="number" class="form-control" name="Expenses[@i].DailyExpenses[@date.Day]" style="width:60px;" value="@Model.Expenses[i].DailyExpenses[date.Day]" />
+                            <input type="number" class="form-control" name="Expenses[@i].DailyExpenses[@date.Day]" style="width:100px;" value="@Model.Expenses[i].DailyExpenses[date.Day]" />
                         </td>
                     }
                     <td>
@@ -72,7 +75,7 @@
         </tbody>
     </table>
 
-    <button type="submit" class="btn btn-primary">Təsdiqlə</button>
+    <button type="submit" class="btn btn-primary w-100">Təsdiqlə</button>
 </form>
 
 @section Scripts {

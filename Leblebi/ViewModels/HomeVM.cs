@@ -7,7 +7,9 @@ public class HomeVM
     public decimal TotalIncome { get; set; }
     public decimal TotalExpense { get; set; }
     public decimal TotalSalaries { get; set; }
-
+    public decimal TotalManagementExpense { get; set; }
+    public decimal CashProfit { get; set; }
+    public decimal OnlineProfit { get; set; }
 
     public List<string> Months { get; set; }
     public List<decimal> MonthlyIncomes { get; set; }
@@ -26,6 +28,12 @@ public class ExpenseReportViewModel
     public List<ExpenseReportViewModel> Subcategories { get; set; } = new List<ExpenseReportViewModel>();
 }
 
+public class ExpensesViewModel
+{
+    public List<MonthlyReportViewModel> MonthlyExpenses { get; set; }
+    public List<Expense> OtherExpenses { get; set; }
+}
+
 public class MonthlyReportViewModel
 {
     public string Title { get; set; }
@@ -37,6 +45,7 @@ public class DailyReport
 {
     public DateOnly Date { get; set; }
     public decimal Value { get; set; }
+    public string? Note { get; set; }
 }
 
 public class MonthlyReportCreateViewModel

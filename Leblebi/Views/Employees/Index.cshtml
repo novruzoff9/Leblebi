@@ -1,15 +1,19 @@
-﻿@model IEnumerable<Leblebi.Models.Employee>
+﻿@using System.Globalization
+@model IEnumerable<Leblebi.Models.Employee>
 
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    CultureInfo culture = new CultureInfo("az-AZ");
+    DateTimeFormatInfo dtfi = culture.DateTimeFormat;
 }
 
 <h1>İşçi siyahısı</h1>
 
 <p>
-    <a asp-action="Create">İşçi artır</a>
+    <a class="btn btn-success" asp-action="Create">İşçi artır</a>
 </p>
+
 <table class="table">
     <thead>
         <tr>
@@ -23,6 +27,9 @@
             </th>
             <th>
                 Maaş
+            </th>
+            <th>
+                İşə başlama
             </th>
             <th></th>
         </tr>
@@ -39,6 +46,9 @@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Salary)
+                </td>
+                <td>
+                    @item.HireDate.ToString("yyyy MMMM", dtfi)
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Düzəliş</a> |

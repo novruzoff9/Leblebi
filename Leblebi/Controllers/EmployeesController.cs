@@ -24,6 +24,7 @@ namespace Leblebi.Controllers
         {
             var employees = await _context.Employees
                 .OrderBy(e => e.Name)
+                .Where(x => x.FireDate == null)
                 .ToListAsync();
             return View(employees);
         }
@@ -146,7 +147,8 @@ namespace Leblebi.Controllers
             var employee = await _context.Employees.FindAsync(id);
             if (employee != null)
             {
-                _context.Employees.Remove(employee);
+                employee.FireDate = DateOnly.FromDateTime(DateTime.Now);
+                _context.Employees.Update(employee);
             }
 
             await _context.SaveChangesAsync();

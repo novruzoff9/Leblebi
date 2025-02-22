@@ -1,4 +1,4 @@
-﻿@model Leblebi.Models.EmployeeSalary
+﻿@model Leblebi.Models.ManagementExpense
 
 @{
     ViewData["Title"] = "Details";
@@ -8,15 +8,9 @@
 <h1>Details</h1>
 
 <div>
-    <h4>EmployeeSalary</h4>
+    <h4>ManagementExpenses</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Employee)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Employee.Id)
-        </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Amount)
         </dt>
@@ -24,10 +18,16 @@
             @Html.DisplayFor(model => model.Amount)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SalaryDate)
+            @Html.DisplayNameFor(model => model.ExpenseDate)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SalaryDate)
+            @Html.DisplayFor(model => model.ExpenseDate)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.ManagementCategory)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.ManagementCategory.Id)
         </dd>
     </dl>
 </div>

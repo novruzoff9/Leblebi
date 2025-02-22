@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Navigate to the project directory
-cd /C:/Users/User/source/repos/Leblebi
+cd C:/Users/User/source/repos/Leblebi
 
 
 # Build the project
@@ -9,3 +9,5 @@ cd /C:/Users/User/source/repos/Leblebi
 
 # Run the project
 dotnet watch run --project Leblebi
+
+sleep 10

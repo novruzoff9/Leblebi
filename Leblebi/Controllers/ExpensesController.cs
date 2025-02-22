@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Leblebi.Data;
 using Leblebi.Models;
 using Leblebi.ViewModels;
+using Leblebi.DTOs;
+using Leblebi.Helper;
 
 namespace Leblebi.Controllers
 {
@@ -21,17 +23,29 @@ namespace Leblebi.Controllers
         }
 
         // GET: Expenses
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? year, int? month)
         {
+            if(month == null)
+            {
+                month = DateOnly.FromDateTime(DateTime.Now).Month;
+            }
+            if(year == null)
+            {
+                year = DateOnly.FromDateTime(DateTime.Now).Year;
+            }
+            ViewBag.year = year;
+            ViewBag.month = month;
             var expenses = await _context.Expenses.Include(e => e.ExpenseCategory)
-                .Where(x => x.ExpenseDate.Year == DateTime.Now.Year && x.ExpenseDate.Month == DateTime.Now.Month)
-                .OrderBy(x=>x.ExpenseCategoryId)
+                .Where(x => x.ExpenseDate.Year == year && x.ExpenseDate.Month == month)
+                .OrderBy(x => x.ExpenseCategoryId)
                 .ToListAsync();
 
             var firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
 
             List<MonthlyReportViewModel> monthlyReports = new List<MonthlyReportViewModel>();
+
+            List<Expense> otherExpenses = new();
 
             MonthlyReportViewModel totalMonthlyReport = new MonthlyReportViewModel
             {
@@ -56,9 +70,22 @@ namespace Leblebi.Controllers
                 DailyReport dailyReport = new DailyReport
                 {
                     Date = DateOnly.FromDateTime(item.ExpenseDate),
-                    Value = item.Amount
+                    Value = item.Amount,
+                    Note = item.Note
                 };
                 monthlyReport.TotalValue += item.Amount;
+                if (item.ExpenseCategoryId == 13)
+                {
+                    otherExpenses.Add(item);
+                }
+
+                if (monthlyReport.Reports.Any(x => x.Date == dailyReport.Date))
+                {
+                    var existingReport = monthlyReport.Reports.First(x => x.Date == dailyReport.Date);
+                    existingReport.Value += dailyReport.Value;
+                    monthlyReport.TotalValue += dailyReport.Value;
+                    continue;
+                }
                 monthlyReport.Reports.Add(dailyReport);
             }
 
@@ -74,7 +101,37 @@ namespace Leblebi.Controllers
             }
             monthlyReports.Add(totalMonthlyReport);
 
-            return View(monthlyReports);
+            monthlyReports = monthlyReports.OrderBy(x => x.Title).ToList();
+
+            otherExpenses = otherExpenses.OrderBy(x=>x.ExpenseDate).ToList();
+            ExpensesViewModel monthlyReportsViewModel = new ExpensesViewModel
+            {
+                MonthlyExpenses = monthlyReports,
+                OtherExpenses = otherExpenses
+            };
+
+            return View(monthlyReportsViewModel);
+        }
+
+        [HttpGet]
+        public IActionResult AddOtherExpenses()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddOtherExpenses(decimal amount, DateTime expenseDate, string note)
+        {
+            var expense = new Expense
+            {
+                Amount = amount,
+                ExpenseDate = expenseDate,
+                ExpenseCategoryId = 13,
+                Note = note
+            };
+            _context.Expenses.Add(expense);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Expenses/Details/5
@@ -142,16 +199,17 @@ namespace Leblebi.Controllers
         }
 
 
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create(int selectedYear, int selectedMonth)
         {
             var categories = await _context.ExpenseCategories
-                .Include(c => c.Expenses.OrderBy(x=>x.ExpenseDate))
-                .Where(c=>c.expenseCategories.Count == 0)
+                .Include(c => c.Expenses.OrderBy(x => x.ExpenseDate))
+                .Where(c => c.expenseCategories.Count == 0)
                 .ToListAsync();
 
-            var currentMonth = DateTime.Now.Month;
-            var currentYear = DateTime.Now.Year;
-            var daysInMonth = DateTime.DaysInMonth(currentYear, currentMonth);
+            var daysInMonth = DateTime.DaysInMonth(selectedYear, selectedMonth);
+
+            ViewBag.year = selectedYear;
+            ViewBag.month = selectedMonth;
 
             var categoryViewModels = categories.Select(c => new ExpenseCategoryViewModel
             {
@@ -160,11 +218,14 @@ namespace Leblebi.Controllers
                 DailyExpenses = Enumerable.Range(1, daysInMonth)
                     .ToDictionary(day => day, day =>
                         c.Expenses
-                            .FirstOrDefault(e => e.ExpenseDate.Year == currentYear
-                                                 && e.ExpenseDate.Month == currentMonth
+                            .FirstOrDefault(e => e.ExpenseDate.Year == selectedYear
+                                                 && e.ExpenseDate.Month == selectedMonth
                                                  && e.ExpenseDate.Day == day)
-                            ?.Amount) 
-            }).ToList();
+                            ?.Amount)
+            }).OrderBy(x => x.CategoryName)
+            .ToList();
+
+            categoryViewModels.Remove(categoryViewModels.FirstOrDefault(x=>x.CategoryName == "Digər xərclər"));
 
 
             var model = new MonthlyReportCreateViewModel { Expenses = categoryViewModels };
@@ -192,7 +253,18 @@ namespace Leblebi.Controllers
                                 ExpenseDate = firstDayOfMonth.AddDays(kvp.Key - 1)
                             };
 
-                            _context.Expenses.Add(expense);
+                            var alredyData = await _context.Expenses
+                                .FirstOrDefaultAsync(x => x.ExpenseCategoryId == expense.ExpenseCategoryId
+                                                        && x.ExpenseDate == expense.ExpenseDate);
+
+                            if (alredyData == null)
+                            {
+                                _context.Expenses.Add(expense);
+                            }
+                            else
+                            {
+                                alredyData.Amount = expense.Amount;
+                            }
                         }
                     }
                 }
@@ -205,109 +277,6 @@ namespace Leblebi.Controllers
         }
 
 
-
-        //// GET: Expenses/Create
-        //public IActionResult Create()
-        //{
-        //    List<ExpenseCategory> expenseCategories = _context.ExpenseCategories
-        //        .Where(x => x.ParentCategoryId == null).ToList();
-        //    List<ExpenseCategory> expenseSubCategories = _context.ExpenseCategories
-        //        .Where(x => x.ParentCategoryId != null).ToList();
-
-        //    ViewData["ExpenseCategoryId"] = new SelectList(expenseCategories, "Id", "Name");
-        //    ViewData["ExpenseSubCategoryId"] = new SelectList(expenseSubCategories, "Id", "Name");
-        //    return View();
-        //}
-
-
-        //// POST: Expenses/Create
-        //// To protect from overposting attacks, enable the specific properties you want to bind to.
-        //// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Create([Bind("Id,ExpenseCategoryId,Amount,ExpenseDate,Note")] Expense expense)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        expense.ExpenseDate = DateTime.SpecifyKind(expense.ExpenseDate, DateTimeKind.Utc);
-        //        _context.Add(expense);
-        //        await _context.SaveChangesAsync();
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    List<ExpenseCategory> expenseCategories = _context.ExpenseCategories
-        //        .Where(x => x.ParentCategoryId == null).ToList();
-        //    ViewData["ExpenseCategoryId"] = new SelectList(expenseCategories, "Id", "Name", expense.ExpenseCategoryId);
-        //    return View(expense);
-        //}
-
-        public JsonResult GetSubCategories(int id)
-        {
-            var expenseSubCategories = _context.ExpenseCategories
-                .Where(x => x.ParentCategoryId == id)
-                .Select(x => new
-                {
-                    Value = x.Id,
-                    Text = x.Name
-                })
-                .ToList();
-            return Json(expenseSubCategories);
-        }
-
-        // GET: Expenses/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var expense = await _context.Expenses.FindAsync(id);
-            if (expense == null)
-            {
-                return NotFound();
-            }
-            ViewData["ExpenseCategoryId"] = new SelectList(_context.ExpenseCategories, "Id", "Name", expense.ExpenseCategoryId);
-            return View(expense);
-        }
-
-        // POST: Expenses/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ExpenseCategoryId,Amount,ExpenseDate,Note")] Expense expense)
-        {
-            if (id != expense.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                expense.ExpenseDate = DateTime.SpecifyKind(expense.ExpenseDate, DateTimeKind.Utc);
-                try
-                {
-                    _context.Update(expense);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ExpenseExists(expense.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["ExpenseCategoryId"] = new SelectList(_context.ExpenseCategories, "Id", "Name", expense.ExpenseCategoryId);
-            return View(expense);
-        }
-
-        // GET: Expenses/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -326,7 +295,6 @@ namespace Leblebi.Controllers
             return View(expense);
         }
 
-        // POST: Expenses/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -344,6 +312,62 @@ namespace Leblebi.Controllers
         private bool ExpenseExists(int id)
         {
             return _context.Expenses.Any(e => e.Id == id);
+        }
+
+
+        public JsonResult GetSubCategories(int id)
+        {
+            var expenseSubCategories = _context.ExpenseCategories
+                .Where(x => x.ParentCategoryId == id)
+                .Select(x => new
+                {
+                    Value = x.Id,
+                    Text = x.Name
+                })
+                .ToList();
+            return Json(expenseSubCategories);
+        }
+
+        public IActionResult ExcelReport(int year, int month)
+        {
+            var expenses = _context.Expenses
+                .Include(e => e.ExpenseCategory)
+                .Where(x => x.ExpenseDate.Year == year && x.ExpenseDate.Month == month)
+                .OrderBy(x => x.ExpenseCategoryId)
+                .ToList();
+            var categories = _context.ExpenseCategories
+                .Include(c => c.expenseCategories)
+                .Where(x => x.expenseCategories.Count == 0)
+                .Select(x=>x.Name).ToList();
+            var report = new ExcelReportDto
+            {
+                Title = "Xərclər",
+                Headers = categories,
+                Data = new List<DailyReportDto>()
+            };
+            foreach (var item in expenses)
+            {
+                var dailyReport = report.Data.FirstOrDefault(x => x.Title == item.ExpenseCategory.Name);
+                if (dailyReport == null)
+                {
+                    dailyReport = new DailyReportDto
+                    {
+                        Title = item.ExpenseCategory.Name,
+                        ValueofDay = new Dictionary<int, string>()
+                    };
+                    report.Data.Add(dailyReport);
+                }
+                if(dailyReport.ValueofDay.ContainsKey(item.ExpenseDate.Day))
+                {
+                    dailyReport.ValueofDay[item.ExpenseDate.Day] = (Convert.ToDecimal(dailyReport.ValueofDay[item.ExpenseDate.Day]) + item.Amount).ToString();
+                    continue;
+                }
+                dailyReport.ValueofDay.Add(item.ExpenseDate.Day, item.Amount.ToString());
+            }
+
+            var fileContent = ExcelHelper.GenerateWorksheet(report, year, month);
+
+            return File(fileContent, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "expenses.xlsx");
         }
     }
 }

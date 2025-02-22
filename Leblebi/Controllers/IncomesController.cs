@@ -10,6 +10,7 @@ using Leblebi.Models;
 using Leblebi.Enums;
 using Leblebi.Helper;
 using Leblebi.ViewModels;
+using Leblebi.DTOs;
 
 namespace Leblebi.Controllers
 {
@@ -23,13 +24,23 @@ namespace Leblebi.Controllers
         }
 
         // GET: Incomes
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? year, int? month)
         {
+            if (month == null)
+            {
+                month = DateOnly.FromDateTime(DateTime.Now).Month;
+            }
+            if (year == null)
+            {
+                year = DateOnly.FromDateTime(DateTime.Now).Year;
+            }
+            ViewBag.year = year;
+            ViewBag.month = month;
             var incomes = await _context.Incomes
                 .OrderByDescending(e => e.IncomeDate)
                 .ToListAsync();
 
-            var firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            var firstDayOfMonth = new DateTime(year ?? 1, month ?? 1, 1);
             var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
 
             List<MonthlyReportViewModel> monthlyReports = new List<MonthlyReportViewModel>();
@@ -80,15 +91,16 @@ namespace Leblebi.Controllers
         }
 
         // GET: Incomes/Create
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create(int selectedYear, int selectedMonth)
         {
             var incomes = await _context.Incomes
                 .OrderByDescending(e => e.IncomeDate)
                 .ToListAsync();
 
-            var currentMonth = DateTime.Now.Month;
-            var currentYear = DateTime.Now.Year;
-            var daysInMonth = DateTime.DaysInMonth(currentYear, currentMonth);
+            var daysInMonth = DateTime.DaysInMonth(selectedYear, selectedMonth);
+
+            ViewBag.year = selectedYear;
+            ViewBag.month = selectedMonth;
 
             List<IncomesOfType> incomesOfTypes = new List<IncomesOfType>();
 
@@ -109,8 +121,8 @@ namespace Leblebi.Controllers
                 DailyExpenses = Enumerable.Range(1, daysInMonth)
                     .ToDictionary(day => day, day =>
                         incomes
-                            .FirstOrDefault(e => e.IncomeDate.Year == currentYear
-                                                 && e.IncomeDate.Month == currentMonth
+                            .FirstOrDefault(e => e.IncomeDate.Year == selectedYear
+                                                 && e.IncomeDate.Month == selectedMonth
                                                  && e.IncomeDate.Day == day)
                             ?.Amount)
             }).ToList();
@@ -146,7 +158,18 @@ namespace Leblebi.Controllers
                                 IncomeDate = firstDayOfMonth.AddDays(kvp.Key - 1)
                             };
 
-                            _context.Incomes.Add(expense);
+                            var alredyData = await _context.Incomes
+                                .FirstOrDefaultAsync(x => x.IncomeType == expense.IncomeType
+                                                        && x.IncomeDate == expense.IncomeDate);
+
+                            if (alredyData == null)
+                            {
+                                _context.Incomes.Add(expense);
+                            }
+                            else
+                            {
+                                alredyData.Amount = expense.Amount;
+                            }
                         }
                     }
                 }
@@ -213,6 +236,43 @@ namespace Leblebi.Controllers
         private bool IncomeExists(int id)
         {
             return _context.Incomes.Any(e => e.Id == id);
+        }
+
+
+        public IActionResult ExcelReport(int year, int month)
+        {
+            var expenses = _context.Incomes
+                .Where(x => x.IncomeDate.Year == year && x.IncomeDate.Month == month)
+                .ToList();
+            var report = new ExcelReportDto
+            {
+                Title = "Gəlirlər",
+                Headers = new List<string> { "Nağd Pul", "POS Terminal" },
+                Data = new List<DailyReportDto>()
+            };
+            foreach (var item in expenses)
+            {
+                var dailyReport = report.Data.FirstOrDefault(x => x.Title == EnumHelper.GetDisplayName(item.IncomeType));
+                if (dailyReport == null)
+                {
+                    dailyReport = new DailyReportDto
+                    {
+                        Title = EnumHelper.GetDisplayName(item.IncomeType),
+                        ValueofDay = new Dictionary<int, string>()
+                    };
+                    report.Data.Add(dailyReport);
+                }
+                if (dailyReport.ValueofDay.ContainsKey(item.IncomeDate.Day))
+                {
+                    dailyReport.ValueofDay[item.IncomeDate.Day] = (Convert.ToDecimal(dailyReport.ValueofDay[item.IncomeDate.Day]) + item.Amount).ToString();
+                    continue;
+                }
+                dailyReport.ValueofDay.Add(item.IncomeDate.Day, item.Amount.ToString());
+            }
+
+            var fileContent = ExcelHelper.GenerateWorksheet(report, year, month);
+
+            return File(fileContent, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "incomes.xlsx");
         }
     }
 }

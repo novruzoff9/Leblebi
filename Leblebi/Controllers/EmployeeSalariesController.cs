@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Leblebi.Data;
 using Leblebi.Models;
 using Leblebi.ViewModels;
+using Leblebi.DTOs;
+using Leblebi.Helper;
 
 namespace Leblebi.Controllers
 {
@@ -21,18 +23,30 @@ namespace Leblebi.Controllers
         }
 
         // GET: EmployeeSalaries
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? year, int? month)
         {
+            if (month == null)
+            {
+                month = DateOnly.FromDateTime(DateTime.Now).Month;
+            }
+            if (year == null)
+            {
+                year = DateOnly.FromDateTime(DateTime.Now).Year;
+            }
+            ViewBag.year = year;
+            ViewBag.month = month;
             var salaries = await _context.Salaries.Include(e => e.Employee)
-                .Where(x => x.SalaryDate.Year == DateTime.Now.Year && x.SalaryDate.Month == DateTime.Now.Month)
+                .Where(x => x.SalaryDate.Year == year && x.SalaryDate.Month == month)
                 .OrderByDescending(e => e.EmployeeId)
                 .ToListAsync();
 
             var employees = await _context.Employees
-                .Include(x => x.Salaries.Where(x => x.SalaryDate.Year == DateTime.Now.Year && x.SalaryDate.Month == DateTime.Now.Month))
+                .Where(x => ((x.HireDate.Year < year) || (x.HireDate.Year == year && x.HireDate.Month <= month)) && (( x.FireDate.Value.Year > year ) || 
+                    (x.FireDate.Value.Year == year && x.FireDate.Value.Month >= month) || !x.FireDate.HasValue))
+                .Include(x => x.Salaries.Where(x => x.SalaryDate.Year == year && x.SalaryDate.Month == month))
                 .ToListAsync();
 
-            var firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            var firstDayOfMonth = new DateTime(year ?? 1, month ?? 1, 1);
             var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
 
             List<MonthlyReportViewModel> monthlyReports = new List<MonthlyReportViewModel>();
@@ -87,34 +101,18 @@ namespace Leblebi.Controllers
             return View(monthlyReports);
         }
 
-        // GET: EmployeeSalaries/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var employeeSalary = await _context.Salaries
-                .Include(e => e.Employee)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (employeeSalary == null)
-            {
-                return NotFound();
-            }
-
-            return View(employeeSalary);
-        }
-
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create(int selectedYear, int selectedMonth)
         {
             var employees = await _context.Employees
                 .Include(c => c.Salaries.OrderBy(x => x.SalaryDate))
+                .Where(x => (x.FireDate.Value.Year < selectedYear) ||
+                    (x.FireDate.Value.Year == selectedYear && x.FireDate.Value.Month <= selectedMonth) || !x.FireDate.HasValue)
                 .ToListAsync();
 
-            var currentMonth = DateTime.Now.Month;
-            var currentYear = DateTime.Now.Year;
-            var daysInMonth = DateTime.DaysInMonth(currentYear, currentMonth);
+            var daysInMonth = DateTime.DaysInMonth(selectedYear, selectedMonth);
+
+            ViewBag.year = selectedYear;
+            ViewBag.month = selectedMonth;
 
             var employeeViewModels = employees.Select(e => new ExpenseCategoryViewModel
             {
@@ -123,8 +121,8 @@ namespace Leblebi.Controllers
                 DailyExpenses = Enumerable.Range(1, daysInMonth)
                     .ToDictionary(day => day, day =>
                         e.Salaries
-                            .FirstOrDefault(e => e.SalaryDate.Year == currentYear
-                                                 && e.SalaryDate.Month == currentMonth
+                            .FirstOrDefault(e => e.SalaryDate.Year == selectedYear
+                                                 && e.SalaryDate.Month == selectedMonth
                                                  && e.SalaryDate.Day == day)
                             ?.Amount)
             }).ToList();
@@ -155,7 +153,18 @@ namespace Leblebi.Controllers
                                 SalaryDate = firstDayOfMonth.AddDays(kvp.Key - 1)
                             };
 
-                            _context.Salaries.Add(newEmp);
+                            var alredyData = await _context.Salaries
+                                .FirstOrDefaultAsync(x => x.SalaryDate == newEmp.SalaryDate
+                                                        && x.EmployeeId == newEmp.EmployeeId);
+
+                            if (alredyData == null)
+                            {
+                                _context.Salaries.Add(newEmp);
+                            }
+                            else
+                            {
+                                alredyData.Amount = newEmp.Amount;
+                            }
                         }
                     }
                 }
@@ -167,110 +176,7 @@ namespace Leblebi.Controllers
             return View(model);
         }
 
-        //// GET: EmployeeSalaries/Create
-        //public IActionResult Create()
-        //{
-        //    var employees = _context.Employees
-        //        .Select(x => new
-        //        {
-        //            Id = x.Id,
-        //            Name = x.Name + " " + x.Surname
-        //        }).ToList();
-        //    ViewData["EmployeeId"] = new SelectList(employees, "Id", "Name");
-        //    return View();
-        //}
 
-        //// POST: EmployeeSalaries/Create
-        //// To protect from overposting attacks, enable the specific properties you want to bind to.
-        //// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Create([Bind("Id,EmployeeId,Amount,SalaryDate")] EmployeeSalary employeeSalary)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        _context.Add(employeeSalary);
-        //        await _context.SaveChangesAsync();
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    var employees = _context.Employees
-        //        .Select(x => new
-        //        {
-        //            Id = x.Id,
-        //            Name = x.Name + " " + x.Surname
-        //        }).ToList();
-        //    ViewData["EmployeeId"] = new SelectList(employees, "Id", "Name", employeeSalary.EmployeeId);
-        //    return View(employeeSalary);
-        //}
-
-        // GET: EmployeeSalaries/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var employeeSalary = await _context.Salaries.FindAsync(id);
-            if (employeeSalary == null)
-            {
-                return NotFound();
-            }
-            var employees = _context.Employees
-                .OrderBy(x => x.Name)
-                .Select(x => new
-                {
-                    Id = x.Id,
-                    Name = x.Name + " " + x.Surname
-                }).ToList();
-            ViewData["EmployeeId"] = new SelectList(employees, "Id", "Name", employeeSalary.EmployeeId);
-            return View(employeeSalary);
-        }
-
-        // POST: EmployeeSalaries/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,EmployeeId,Amount,SalaryDate")] EmployeeSalary employeeSalary)
-        {
-            if (id != employeeSalary.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(employeeSalary);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!EmployeeSalaryExists(employeeSalary.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            var employees = _context.Employees
-                .OrderBy(x => x.Name)
-                .Select(x => new
-                {
-                    Id = x.Id,
-                    Name = x.Name + " " + x.Surname
-                }).ToList();
-            ViewData["EmployeeId"] = new SelectList(employees, "Id", "Name", employeeSalary.EmployeeId);
-            return View(employeeSalary);
-        }
-
-        // GET: EmployeeSalaries/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -307,6 +213,49 @@ namespace Leblebi.Controllers
         private bool EmployeeSalaryExists(int id)
         {
             return _context.Salaries.Any(e => e.Id == id);
+        }
+
+
+        public IActionResult ExcelReport(int year, int month)
+        {
+            var salaries = _context.Salaries
+                .Include(e => e.Employee)
+                .Where(x => x.SalaryDate.Year == year && x.SalaryDate.Month == month)
+                .OrderBy(x => x.EmployeeId)
+                .ToList();
+            var employees = _context.Employees
+                .Where(x => ((x.HireDate.Year < year) || (x.HireDate.Year == year && x.HireDate.Month <= month)) && ((x.FireDate.Value.Year > year) ||
+                    (x.FireDate.Value.Year == year && x.FireDate.Value.Month >= month) || !x.FireDate.HasValue))
+                .Select(x => x.Name + " " + x.Surname).ToList();
+            var report = new ExcelReportDto
+            {
+                Title = "Maaşlar",
+                Headers = employees,
+                Data = new List<DailyReportDto>()
+            };
+            foreach (var item in salaries)
+            {
+                var dailyReport = report.Data.FirstOrDefault(x => x.Title == item.Employee.Name + " " + item.Employee.Surname);
+                if (dailyReport == null)
+                {
+                    dailyReport = new DailyReportDto
+                    {
+                        Title = item.Employee.Name + " " + item.Employee.Surname,
+                        ValueofDay = new Dictionary<int, string>()
+                    };
+                    report.Data.Add(dailyReport);
+                }
+                if (dailyReport.ValueofDay.ContainsKey(item.SalaryDate.Day))
+                {
+                    dailyReport.ValueofDay[item.SalaryDate.Day] = (Convert.ToDecimal(dailyReport.ValueofDay[item.SalaryDate.Day]) + item.Amount).ToString();
+                    continue;
+                }
+                dailyReport.ValueofDay.Add(item.SalaryDate.Day, item.Amount.ToString());
+            }
+
+            var fileContent = ExcelHelper.GenerateWorksheet(report, year, month);
+
+            return File(fileContent, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "salaries.xlsx");
         }
     }
 }

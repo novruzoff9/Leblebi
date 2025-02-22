@@ -1,17 +1,90 @@
-﻿@model IEnumerable<Leblebi.ViewModels.MonthlyReportViewModel>
+﻿@using System.Globalization
+@model Leblebi.ViewModels.ExpensesViewModel
 
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+    int year = ViewBag.year;
+    int month = ViewBag.month;
+    var firstDayOfMonth = new DateTime(year, month, 1);
     var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+    CultureInfo culture = new CultureInfo("az-AZ");
+    DateTimeFormatInfo dtfi = culture.DateTimeFormat;
 }
 
+<style>
+    .form {
+        overflow-x: auto; /* Üfüqi sürüşdürmə aktiv olsun */
+        max-width: 100%; /* Konteynerin genişliyini məhdudlaşdır */
+    }
+
+    .table {
+        width: 100%; /* Cədvəl tam genişlikdə olsun */
+        border-collapse: collapse; /* Sərhədləri birləşdir */
+    }
+
+    th, td {
+        padding: 8px;
+        border: 1px solid #ddd;
+        text-align: center;
+        white-space: nowrap; /* Sütunlar daralmasın */
+    }
+
+    .sticky-col {
+        position: sticky;
+        left: 0;
+        top: 0;
+        background-color: white !important; /* Sabit sütunun fon rəngi */
+        z-index: 2; /* Üst qat */
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Sərhəd effekti */
+    }
+
+</style>
 <h1>Xərclər</h1>
 
-<p>
-    <a asp-action="Create">Xərc artır</a>
-</p>
+<div class="d-flex gap-4 align-items-center">
+    <form asp-action="Index" class="d-flex gap-3 mb-3 align-items-center">
+        <label for="year">İl:</label>
+        <select id="year" class="form-control w-auto" name="year">
+            @for (var i = 2021; i <= DateTime.Now.Year; i++)
+            {
+                if (i == year)
+                {
+                    <option value="@i" selected>@i</option>
+                }
+                else
+                {
+                    <option value="@i">@i</option>
+                }
+            })
+        </select>
+        <label for="month">Ay:</label>
+        <select id="month" class="form-control" name="month">
+            @for (var i = 1; i <= 12; i++)
+            {
+                if (i == month)
+                {
+                    <option value="@i" selected>@dtfi.GetMonthName(@i)</option>
+                }
+                else
+                {
+                    <option value="@i">@dtfi.GetMonthName(@i)</option>
+                }
+            })
+        </select>
+        <button type="submit" class="btn btn-primary">Axtar</button>
+    </form>
+    <p>
+        <a asp-action="Create" class="btn btn-warning" asp-route-selectedYear="@year" asp-route-selectedMonth="@month">Xərc artır</a>
+    </p>
+    <p>
+        <a class="btn btn-secondary" asp-action="AddOtherExpenses">Digər xərc artır</a>
+    </p>
+    <p>
+        <a download="download" class="btn btn-success" asp-action="ExcelReport" asp-route-year="@year" asp-route-month="@month">Excel çıxarış</a>
+    </p>
+</div>
+
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
@@ -20,20 +93,20 @@
             </th>
             @for (var date = firstDayOfMonth; date <= lastDayOfMonth; date = date.AddDays(1))
             {
-                <th style="width:60px !important">
+                <th style="width:60px !important" class="sticky-col">
                     @date.ToString("dd")
                 </th>
             }
-            <th>
+            <th class="sticky-col">
                 Ümumi məbləğ
             </th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.MonthlyExpenses)
         {
             <tr>
-                <td>
+                <td class="sticky-col">
                     @Html.DisplayFor(modelItem => item.Title)
                 </td>
                 @for (var i = firstDayOfMonth; i <= lastDayOfMonth; i = i.AddDays(1))
@@ -58,3 +131,10 @@
         }
     </tbody>
 </table>
+<h3>Digər xərclər:</h3>
+<ul>
+    @foreach (var item in Model.OtherExpenses)
+    {
+        <li>@item.ExpenseDate.ToString("dd MMMM", dtfi) - @item.Amount ₼ :  @item.Note</li>
+    }
+</ul>
